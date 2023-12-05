@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from cvzone.HandTrackingModule import HandDetector
 import time
+import os
 
 
 # Initialize
@@ -45,6 +46,13 @@ speedBlue = 20
 score = 0
 startTime = time.time()
 totalTime = 60
+best_score = 0
+
+best_score_file = 'best_score.txt'
+if os.path.exists(best_score_file):
+    with open(best_score_file, 'r') as file:
+        best_score = int(file.read())
+
 
 # Detector
 detector = HandDetector(detectionCon=0.8, maxHands=1)
@@ -70,6 +78,8 @@ while start:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             start = False
+            with open(best_score_file, 'w') as file:
+                file.write(str(best_score))
             pygame.quit()
 
     # Apply Logic
@@ -80,8 +90,10 @@ while start:
         font = pygame.font.Font('./Resources/Marcellus-Regular.ttf', 50)
         textScore = font.render(f'Your Score: {score}', True, (50, 50, 255))
         textTime = font.render(f'Time UP', True, (50, 50, 255))
-        window.blit(textScore, (450, 350))
-        window.blit(textTime, (530, 275))
+        best_score_text = font.render(f'Best Score: {best_score}', True, (50, 50, 255))
+        window.blit(best_score_text, (460, 400))
+        window.blit(textScore, (450, 330))
+        window.blit(textTime, (530, 255))
 
     else:
         # OpenCV
@@ -124,6 +136,12 @@ while start:
                 resetBlueBalloon()
                 score += 15
                 speedBlue += 1
+
+        if score > best_score:
+            best_score = score
+            with open('best_score.txt', 'w') as file:
+                file.write(str(best_score))
+
 
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         imgRGB = np.rot90(imgRGB)
