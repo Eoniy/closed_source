@@ -29,19 +29,23 @@ cap.set(4, 720)  # height
 imgRedBalloon = pygame.image.load('./Resources/BalloonRed.png').convert_alpha()
 imgYellowBalloon = pygame.image.load('./Resources/BalloonYellow.png').convert_alpha()
 imgBlueBalloon = pygame.image.load('./Resources/BalloonBlue.png').convert_alpha()
+imgBomb = pygame.image.load('Bomb.png').convert_alpha()
 
 rectRedBalloon = imgRedBalloon.get_rect()
 rectYellowBalloon = imgYellowBalloon.get_rect()
 rectBlueBalloon = imgBlueBalloon.get_rect()
+rectBomb = imgBomb.get_rect()
 
 rectRedBalloon.x, rectRedBalloon.y = 500, 300
 rectYellowBalloon.x, rectYellowBalloon.y = 500, 300
 rectBlueBalloon.x, rectBlueBalloon.y = 500, 300
+rectBomb.x, rectBomb.y = 500, 300
 
 # Variables
 speedRed = 15
 speedYellow = 10
 speedBlue = 20
+speedBomb = 10
 
 score = 0
 startTime = time.time()
@@ -53,6 +57,8 @@ if os.path.exists(best_score_file):
     with open(best_score_file, 'r') as file:
         best_score = int(file.read())
 
+# New variable for controlling bomb frequency
+bombFrequency = 0.001  # Adjust this value to control bomb frequency (lower value = fewer bombs)
 
 # Detector
 detector = HandDetector(detectionCon=0.8, maxHands=1)
@@ -70,6 +76,9 @@ def resetBlueBalloon():
     rectBlueBalloon.x = random.randint(100, img.shape[1] - 100)
     rectBlueBalloon.y = img.shape[0] + 50
 
+def resetBomb():
+    rectBomb.x = random.randint(100, img.shape[1] - 100)
+    rectBomb.y = img.shape[0] + 500
 
 # Main loop
 start = True
@@ -104,6 +113,7 @@ while start:
         rectRedBalloon.y -= speedRed  # Move the balloon up
         rectYellowBalloon.y -= speedYellow
         rectBlueBalloon.y -= speedBlue
+        rectBomb.y -= speedBomb
         
         # check if balloon has reached the top without pop
         if rectRedBalloon.y < 0:
@@ -118,6 +128,10 @@ while start:
             resetBlueBalloon()
             speedBlue += 1
             
+        if rectBomb.y < 0:
+            resetBomb()
+            speedBomb += 1
+
         if hands:
             hand = hands[0]
             x, y = hand['lmList'][8][0:2]
@@ -137,6 +151,10 @@ while start:
                 score += 15
                 speedBlue += 1
 
+            if rectBomb.collidepoint(x, y):
+                resetBomb()
+                score -= 20
+
         if score > best_score:
             best_score = score
             with open('best_score.txt', 'w') as file:
@@ -151,12 +169,17 @@ while start:
         window.blit(imgRedBalloon, rectRedBalloon)
         window.blit(imgYellowBalloon, rectYellowBalloon)
         window.blit(imgBlueBalloon, rectBlueBalloon)
+        window.blit(imgBomb, rectBomb)
 
         font = pygame.font.Font('./Resources/Marcellus-Regular.ttf', 50)
         textScore = font.render(f'Score: {score}', True, (50, 50, 255))
         textTime = font.render(f'Time: {timeRemain}', True, (50, 50, 255))
         window.blit(textScore, (35, 35))
         window.blit(textTime, (1000, 35))
+
+        # Adjust bomb frequency
+        if random.random() < bombFrequency:
+            resetBomb()
 
     # Update Display
     pygame.display.update()
