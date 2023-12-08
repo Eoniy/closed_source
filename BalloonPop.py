@@ -29,7 +29,7 @@ cap.set(4, 720)  # height
 imgRedBalloon = pygame.image.load('./Resources/BalloonRed.png').convert_alpha()
 imgYellowBalloon = pygame.image.load('./Resources/BalloonYellow.png').convert_alpha()
 imgBlueBalloon = pygame.image.load('./Resources/BalloonBlue.png').convert_alpha()
-imgBomb = pygame.image.load('Bomb.png').convert_alpha()
+imgBomb = pygame.image.load('./Resources/Bomb.png').convert_alpha()
 
 rectRedBalloon = imgRedBalloon.get_rect()
 rectYellowBalloon = imgYellowBalloon.get_rect()
